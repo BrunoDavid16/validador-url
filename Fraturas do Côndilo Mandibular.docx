@@ -1,0 +1,158 @@
+package validador.url;
+
+import java.util.regex.Pattern;
+
+/**
+ * Validador de Parâmetros de URL
+ * 
+ * Esta classe implementa a validação de parâmetros de consulta em URLs
+ * seguindo regras específicas de formato.
+ * 
+ * @author Seu Nome
+ * @version 1.0
+ * @since 2025
+ */
+public class ValidadorUrl {
+    
+    // Padrões regex para validação
+    private static final Pattern PADRAO_NOME = Pattern.compile("^[a-zA-Z0-9]+$");
+    private static final Pattern PADRAO_VALOR = Pattern.compile("^[a-zA-Z0-9@.]+$");
+    
+    /**
+     * Valida se os parâmetros de uma URL estão no formato correto.
+     * 
+     * Regras de validação:
+     * - Deve começar com '?'
+     * - Nome do parâmetro: alfanumérico (sem espaços ou caracteres especiais)
+     * - Valor do parâmetro: alfanumérico, @ e . são permitidos
+     * - Separador entre parâmetros: '&'
+     * - Separador entre parâmetro e valor: '='
+     * 
+     * @param url String com a URL e parâmetros de consulta
+     * @return "Parametros validos" se a URL está correta, "Parametros invalidos" caso contrário
+     */
+    public static String validarParametrosUrl(String url) {
+        // Verifica se a URL é nula ou vazia
+        if (url == null || url.isEmpty()) {
+            return "Parametros invalidos";
+        }
+        
+        // Verifica se a URL começa com '?'
+        if (!url.startsWith("?")) {
+            return "Parametros invalidos";
+        }
+        
+        // Remove o '?' do início
+        String parametrosStr = url.substring(1);
+        
+        // Verifica se há parâmetros após o '?'
+        if (parametrosStr.isEmpty()) {
+            return "Parametros invalidos";
+        }
+        
+        // Divide os parâmetros pelo separador '&'
+        String[] parametros = parametrosStr.split("&");
+        
+        // Valida cada parâmetro individualmente
+        for (String parametro : parametros) {
+            if (!validarParametroIndividual(parametro)) {
+                return "Parametros invalidos";
+            }
+        }
+        
+        return "Parametros validos";
+    }
+    
+    /**
+     * Valida um parâmetro individual
+     * 
+     * @param parametro String contendo um parâmetro no formato nome=valor
+     * @return true se o parâmetro é válido, false caso contrário
+     */
+    private static boolean validarParametroIndividual(String parametro) {
+        // Verifica se o parâmetro contém exatamente um '='
+        if (contarOcorrencias(parametro, '=') != 1) {
+            return false;
+        }
+        
+        // Divide o parâmetro em nome e valor
+        String[] partes = parametro.split("=", 2);
+        String nome = partes[0];
+        String valor = partes[1];
+        
+        // Valida o nome do parâmetro
+        if (!validarNome(nome)) {
+            return false;
+        }
+        
+        // Valida o valor do parâmetro
+        if (!validarValor(valor)) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Valida o nome de um parâmetro
+     * 
+     * @param nome String contendo o nome do parâmetro
+     * @return true se o nome é válido, false caso contrário
+     */
+    private static boolean validarNome(String nome) {
+        return nome != null && 
+               !nome.isEmpty() && 
+               PADRAO_NOME.matcher(nome).matches();
+    }
+    
+    /**
+     * Valida o valor de um parâmetro
+     * 
+     * @param valor String contendo o valor do parâmetro
+     * @return true se o valor é válido, false caso contrário
+     */
+    private static boolean validarValor(String valor) {
+        return valor != null && 
+               !valor.isEmpty() && 
+               PADRAO_VALOR.matcher(valor).matches();
+    }
+    
+    /**
+     * Conta as ocorrências de um caractere em uma string
+     * 
+     * @param str String onde contar
+     * @param ch Caractere a ser contado
+     * @return Número de ocorrências
+     */
+    private static int contarOcorrencias(String str, char ch) {
+        int contador = 0;
+        for (char c : str.toCharArray()) {
+            if (c == ch) {
+                contador++;
+            }
+        }
+        return contador;
+    }
+    
+    /**
+     * Método principal para demonstração
+     * 
+     * @param args Argumentos da linha de comando
+     */
+    public static void main(String[] args) {
+        // Exemplos de uso
+        String[] exemplos = {
+            "?usuario=joao&idade=30",
+            "?nome=ana&email=ana@mail.com",
+            "usuario=joao&idade=abc",
+            "?usuario=sabrina idade=30"
+        };
+        
+        System.out.println("=== Demonstração do Validador de Parâmetros URL ===\n");
+        
+        for (String exemplo : exemplos) {
+            String resultado = validarParametrosUrl(exemplo);
+            System.out.printf("URL: %-35s -> %s%n", exemplo, resultado);
+        }
+    }
+}
